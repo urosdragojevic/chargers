@@ -1,0 +1,14 @@
+{
+  "extends": "nx/presets/npm.json",
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "defaultBase": "master",
+  "nxCloudId": "66e88030f43a04445f665841",
+  "namedInputs": {
+    "sharedGlobals": [
+      "{workspaceRoot}/.gitlab-ci.yml"
+    ],
+    "default": [
+      "sharedGlobals"
+    ]
+  }
+}
