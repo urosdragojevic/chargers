@@ -4,11 +4,30 @@
   "defaultBase": "master",
   "nxCloudId": "66e88030f43a04445f665841",
   "namedInputs": {
-    "sharedGlobals": [
-      "{workspaceRoot}/.gitlab-ci.yml"
-    ],
-    "default": [
-      "sharedGlobals"
-    ]
-  }
+    "sharedGlobals": ["{workspaceRoot}/.gitlab-ci.yml"],
+    "default": ["sharedGlobals"]
+  },
+  "plugins": [
+    {
+      "plugin": "@nx/webpack/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "serveTargetName": "serve",
+        "previewTargetName": "preview"
+      }
+    },
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "lint"
+      }
+    },
+    {
+      "plugin": "@nx/jest/plugin",
+      "options": {
+        "targetName": "test"
+      },
+      "exclude": ["apps/api-e2e/**/*"]
+    }
+  ]
 }
