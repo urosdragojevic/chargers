@@ -2,9 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class ChargingSessionDto {
   @ApiProperty()
-  userId: number;
+  userId: string;
   @ApiProperty()
-  chargingStationId: number;
+  chargingStationId: string;
   @ApiProperty()
   startTime: Date;
   @ApiProperty()

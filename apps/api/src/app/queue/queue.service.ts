@@ -1,20 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { ChargingStationService } from '../charging-station/charging-station.service';
-import { ChargingStationStatus } from '../charging-station/charging-station-status.enum';
 import { ChargingSessionService } from '../charging-session/charging-session.service';
 import { ChargingSession } from '../charging-session/charging-session';
 import { UsersService } from '../users/users.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 export interface QueuedUser {
-  userId: number;
+  userId: string;
   priority: number;
 }
+
+const MAX_SESSION_DURATION = 8;
+const MAX_QUEUE_SIZE = 10;
 
 @Injectable()
 export class QueueService {
   private readonly queue: QueuedUser[] = [];
-  private priorityCount = 0;
+  private priorityCount = 1;
 
   constructor(
     private readonly chargingStationService: ChargingStationService,
@@ -22,40 +24,45 @@ export class QueueService {
     private readonly usersService: UsersService
   ) {}
 
-  addToQueue(userId: number) {
-    const id = this.queue.filter((user) => user.userId === userId);
-    if (id.length > 0) {
+  async addToQueue(userId: string) {
+    const existing = this.queue.filter((user) => user.userId === userId);
+    if (existing.length > 0) {
       throw new Error('Already in queue.');
+    }
+    if (this.queue.length === MAX_QUEUE_SIZE) {
+      throw new Error('Queue full.');
+    }
+    const activeSession =
+      await this.sessionService.activeSessionExistsForUserId(userId);
+    if (activeSession) {
+      throw new Error('Active session is in progress for user.');
     }
     this.queue.push({ userId, priority: this.priorityCount++ });
   }
 
+  getNextInQueue(): QueuedUser {
+    this.queue.sort((a, b) => b.priority - a.priority);
+    return this.queue.pop();
+  }
+
   @Cron(CronExpression.EVERY_MINUTE)
   async processQueue() {
-    const stations = await this.chargingStationService.getChargingStations();
-    const freeStations = stations.filter(
-      (station) => station.status === ChargingStationStatus.FREE
-    );
-    for (const free of freeStations) {
-      const next = this.queue.pop();
+    const stations =
+      await this.chargingStationService.getAvailableChargingStations();
+    for (const station of stations) {
+      const next = this.getNextInQueue();
       if (next) {
         const now = new Date();
         const newSession = new ChargingSession();
         const user = await this.usersService.findOne(next.userId);
         newSession.user = user;
-        newSession.chargingStation = free;
+        newSession.chargingStation = Promise.resolve(station);
         newSession.startTime = now;
-        // Set endTime to the startTime of the next session in line.
-        const s = free.chargingSessions
-          .filter((session) => session.startTime > now)
-          .sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
-          .pop();
-        if (s) {
-          newSession.endTime = s.startTime;
-        }
+        newSession.endTime = new Date(
+          now.getTime() + MAX_SESSION_DURATION * 60 * 60 * 1000
+        );
         newSession.reserved = false;
         return this.sessionService.saveChargingSession(newSession);
-        // TODO: Delete QueuedUser.
       }
       // skip looping if there is no one in the queue.
       return;

@@ -19,14 +19,25 @@ export class ChargingSession {
 
   @ManyToOne(() => ChargingStation)
   @JoinColumn()
-  chargingStation: ChargingStation;
+  chargingStation: Promise<ChargingStation>;
 
   @Column()
   startTime: Date;
 
-  @Column({ nullable: true })
+  @Column()
   endTime: Date;
 
   @Column()
   reserved: boolean;
+
+  isUser(user: User) {
+    return this.user.id === user.id;
+  }
+
+  isActive(other: ChargingSession) {
+    return (
+      (this.startTime > other.startTime && this.startTime > other.endTime) ||
+      (this.endTime < other.startTime && this.endTime < other.endTime)
+    );
+  }
 }

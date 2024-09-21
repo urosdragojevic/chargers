@@ -40,4 +40,27 @@ describe('QueueService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  it('should return next in queue by priority', () => {
+    service.addToQueue(1);
+    service.addToQueue(2);
+    service.addToQueue(3);
+    service.addToQueue(4);
+    expect(service.getNextInQueue()).toEqual({
+      userId: 1,
+      priority: 1,
+    });
+    expect(service.getNextInQueue()).toEqual({
+      userId: 2,
+      priority: 2,
+    });
+    expect(service.getNextInQueue()).toEqual({
+      userId: 3,
+      priority: 3,
+    });
+    expect(service.getNextInQueue()).toEqual({
+      userId: 4,
+      priority: 4,
+    });
+  });
 });

@@ -1,4 +1,4 @@
 export enum ChargingStationStatus {
-  FREE,
-  IN_USE,
+  FREE = 'FREE',
+  IN_USE = 'IN_USE',
 }

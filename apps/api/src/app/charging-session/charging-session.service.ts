@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChargingSession } from './charging-session';
-import { Repository } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
 @Injectable()
 export class ChargingSessionService {
@@ -16,7 +16,9 @@ export class ChargingSessionService {
     return this.chargingSessionRepository.save(chargingSession);
   }
 
-  getChargingSessions(chargingStationId?: number) {
+  getChargingSessions(chargingStationId?: string, userId?: string) {
+    const start = new Date().setHours(0, 0, 0);
+    const end = new Date().setHours(23, 59, 59);
     return this.chargingSessionRepository.find({
       relations: {
         chargingStation: true,
@@ -25,9 +27,28 @@ export class ChargingSessionService {
         chargingStation: {
           id: chargingStationId,
         },
+        user: {
+          id: userId,
+        },
+        startTime: Between(new Date(start), new Date(end)),
       },
     });
   }
 
-  // TODO: get charging stations for today only
+  getById(id: number) {
+    return this.chargingSessionRepository.findOneBy({ id });
+  }
+
+  async activeSessionExistsForUserId(userId: string): Promise<boolean> {
+    const now = new Date();
+    return this.chargingSessionRepository.exists({
+      where: {
+        user: {
+          id: userId,
+        },
+        startTime: LessThanOrEqual(new Date(now)),
+        endTime: MoreThanOrEqual(new Date(now)),
+      },
+    });
+  }
 }

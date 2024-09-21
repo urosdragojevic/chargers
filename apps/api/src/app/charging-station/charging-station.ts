@@ -5,18 +5,20 @@ import { ChargingStationStatus } from './charging-station-status.enum';
 
 @Entity()
 export class ChargingStation {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   @ApiProperty()
   location: string;
 
-  @OneToMany(() => ChargingSession, (session) => session.chargingStation, {
-    eager: true,
-  })
-  chargingSessions: ChargingSession[];
+  @OneToMany(() => ChargingSession, (session) => session.chargingStation)
+  chargingSessions: Promise<ChargingSession[]>;
 
-  @Column()
+  @Column({
+    type: 'enum',
+    enum: ChargingStationStatus,
+    default: ChargingStationStatus.FREE,
+  })
   status: ChargingStationStatus;
 }
