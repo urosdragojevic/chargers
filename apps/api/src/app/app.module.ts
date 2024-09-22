@@ -7,6 +7,9 @@ import { UsersModule } from './users/users.module';
 import { ChargingStationService } from './charging-station/charging-station.service';
 import { ChargingSessionService } from './charging-session/charging-session.service';
 import { QueueService } from './queue/queue.service';
+import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './auth/auth.guard';
 
 @Module({
   imports: [
@@ -22,6 +25,7 @@ import { QueueService } from './queue/queue.service';
       logging: true,
     }),
     UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
@@ -29,6 +33,10 @@ import { QueueService } from './queue/queue.service';
     ChargingStationService,
     ChargingSessionService,
     QueueService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
 })
 export class AppModule {}

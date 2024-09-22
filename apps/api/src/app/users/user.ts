@@ -13,4 +13,12 @@ export class User {
   @Column()
   @ApiProperty()
   lastName: string;
+
+  @Column()
+  @ApiProperty()
+  username: string;
+
+  @Column()
+  @ApiProperty()
+  password: string;
 }

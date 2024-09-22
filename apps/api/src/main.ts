@@ -17,6 +17,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
 
   const config = new DocumentBuilder()
+    .addBasicAuth()
     .setTitle('Chargers')
     .setDescription('The chargers API description')
     .setVersion('1.0')

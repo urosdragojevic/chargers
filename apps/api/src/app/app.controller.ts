@@ -2,7 +2,8 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 
 import { AppService } from './app.service';
 import { ChargingSessionDto } from './charging-session/charging-session.dto';
-import { ApiProperty, ApiQuery } from '@nestjs/swagger';
+import { ApiBasicAuth, ApiProperty, ApiQuery } from '@nestjs/swagger';
+import { AuthenticatedUser, User } from './auth/user.decorator';
 
 export class AddChargingStationDto {
   @ApiProperty()
@@ -10,6 +11,7 @@ export class AddChargingStationDto {
 }
 
 export class EnterQueueDto {
+  @ApiProperty()
   userId: string;
 }
 
@@ -36,6 +38,7 @@ export class ReserveSessionDto {
   endTime: Date;
 }
 
+@ApiBasicAuth()
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
@@ -47,7 +50,11 @@ export class AppController {
   }
 
   @Post('/charging-stations')
-  addChargingStation(@Body() id: AddChargingStationDto) {
+  addChargingStation(
+    @Body() id: AddChargingStationDto,
+    @User() user: AuthenticatedUser
+  ) {
+    console.log(user);
     return this.appService.addChargingStation(id);
   }
 

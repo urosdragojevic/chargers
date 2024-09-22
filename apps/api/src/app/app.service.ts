@@ -14,8 +14,6 @@ import { ChargingStation } from './charging-station/charging-station';
 import { ChargingStationStatus } from './charging-station/charging-station-status.enum';
 import { QueueService } from './queue/queue.service';
 
-const QUEUE_CAPACITY = 5;
-
 @Injectable()
 export class AppService {
   constructor(
