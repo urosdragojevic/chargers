@@ -22,7 +22,7 @@ export function App() {
   const refreshState = async () => {
     await getQueue().then((queue) => setQueue(queue));
     await getChargingStations().then((stations) => setStations(stations));
-    await getChargingSession('166aec98-0a59-4b79-bba0-dcf9c1e019be').then(
+    await getChargingSession(process.env['REACT_APP_USER_ID']).then(
       (sessions) => {
         const now = new Date();
         const active = sessions.filter(

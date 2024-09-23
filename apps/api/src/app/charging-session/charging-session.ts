@@ -27,9 +27,6 @@ export class ChargingSession {
   @Column()
   endTime: Date;
 
-  @Column()
-  reserved: boolean;
-
   isUser(user: User) {
     return this.user.id === user.id;
   }

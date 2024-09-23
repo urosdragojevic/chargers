@@ -5,7 +5,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { SignInDto } from './auth.controller';
 import { Reflector } from '@nestjs/core';
 import { Public } from './public.decorator';
 
@@ -22,13 +21,13 @@ export class AuthGuard implements CanActivate {
       return true;
     }
     const request = context.switchToHttp().getRequest();
-    const dto: SignInDto = this.extractBasicAuth(request);
+    const dto = this.extractBasicAuth(request);
     const user = await this.authService.signIn(dto.username, dto.password);
     request['user'] = user;
     return true;
   }
 
-  private extractBasicAuth(request: any): SignInDto {
+  private extractBasicAuth(request: any) {
     const header = request.headers.authorization;
     if (!header) {
       throw new UnauthorizedException('Missing auth header.');

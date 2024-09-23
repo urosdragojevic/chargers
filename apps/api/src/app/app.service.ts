@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  AddChargingStationDto,
-  ReserveSessionDto,
-  StartChargingSessionDto,
-} from './app.controller';
+import { AddChargingStationDto } from './app.controller';
 import { UsersService } from './users/users.service';
 import { ChargingStationService } from './charging-station/charging-station.service';
 import { ChargingSessionService } from './charging-session/charging-session.service';
@@ -50,53 +46,11 @@ export class AppService {
     chargingSession.chargingStation = Promise.resolve(chargingStation);
     chargingSession.startTime = chargingSessionDto.startTime;
     chargingSession.endTime = chargingSessionDto.endTime;
-    chargingSession.reserved = chargingSessionDto.reserved;
     return this.chargingSessionService.saveChargingSession(chargingSession);
   }
 
   getChargingSessions(chargingStationId?: string) {
     return this.chargingSessionService.getChargingSessions(chargingStationId);
-  }
-
-  async startChargingSession(userId: string, dto: StartChargingSessionDto) {
-    const chargingStation = await this.chargingStationsService.getById(
-      dto.chargingStationId
-    );
-    const sessions = await chargingStation.chargingSessions;
-    const now = new Date();
-    if (sessions.length > 0) {
-      const isActiveSession = sessions
-        .map((session) => {
-          return (
-            session.startTime < now &&
-            (now < session.endTime || session.endTime === null)
-          );
-        })
-        .includes(true);
-      if (isActiveSession) {
-        throw new Error(
-          'Session is already in progress, cannot create charging session.'
-        );
-        // TODO: add to queue?
-      }
-    }
-    const newSession = new ChargingSession();
-    const user = await this.usersService.findOne(userId);
-    newSession.user = user;
-    newSession.chargingStation = Promise.resolve(chargingStation);
-    newSession.startTime = now;
-    // Set endTime to the startTime of the next session in line.
-    const s = sessions
-      .filter((session) => session.startTime > now)
-      .sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
-      .pop();
-    if (s) {
-      newSession.endTime = s.startTime;
-    }
-    newSession.reserved = false;
-    chargingStation.status = ChargingStationStatus.IN_USE;
-    await this.chargingStationsService.createChargingStation(chargingStation);
-    return this.chargingSessionService.saveChargingSession(newSession);
   }
 
   async endChargingSession(id: number, userId: string) {
@@ -123,30 +77,6 @@ export class AppService {
     chargingStation.status = ChargingStationStatus.FREE;
     await this.chargingStationsService.createChargingStation(chargingStation);
     return this.chargingSessionService.saveChargingSession(session);
-  }
-
-  async reserveSession(dto: ReserveSessionDto) {
-    const chargingStation = await this.chargingStationsService.getById(
-      dto.chargingStationId
-    );
-    const sessions = await chargingStation.chargingSessions;
-    const newSession = new ChargingSession();
-    const user = await this.usersService.findOne(dto.userId);
-    newSession.user = user;
-    newSession.chargingStation = Promise.resolve(chargingStation);
-    newSession.startTime = dto.startTime;
-    newSession.endTime = dto.endTime;
-    newSession.reserved = true;
-    const isActiveSession = sessions
-      .map((session) => session.isActive(newSession))
-      .includes(true);
-    if (isActiveSession) {
-      throw new Error(
-        'Session is already in progress, cannot reserve charging session.'
-      );
-      // TODO: add to queue?
-    }
-    return this.chargingSessionService.saveChargingSession(newSession);
   }
 
   getQueue() {

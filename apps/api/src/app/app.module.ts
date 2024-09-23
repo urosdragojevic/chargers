@@ -4,13 +4,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
-import { ChargingStationService } from './charging-station/charging-station.service';
-import { ChargingSessionService } from './charging-session/charging-session.service';
-import { QueueService } from './queue/queue.service';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ChargingSessionModule } from './charging-session/charging-session.module';
+import { ChargingStationModule } from './charging-station/charging-station.module';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
   imports: [
@@ -28,13 +28,13 @@ import { ScheduleModule } from '@nestjs/schedule';
     UsersModule,
     AuthModule,
     ScheduleModule.forRoot(),
+    ChargingSessionModule,
+    ChargingStationModule,
+    QueueModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    ChargingStationService,
-    ChargingSessionService,
-    QueueService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,

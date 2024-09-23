@@ -42,24 +42,24 @@ describe('QueueService', () => {
   });
 
   it('should return next in queue by priority', () => {
-    service.addToQueue(1);
-    service.addToQueue(2);
-    service.addToQueue(3);
-    service.addToQueue(4);
+    service.addToQueue('a');
+    service.addToQueue('b');
+    service.addToQueue('c');
+    service.addToQueue('d');
     expect(service.getNextInQueue()).toEqual({
-      userId: 1,
+      userId: 'a',
       priority: 1,
     });
     expect(service.getNextInQueue()).toEqual({
-      userId: 2,
+      userId: 'b',
       priority: 2,
     });
     expect(service.getNextInQueue()).toEqual({
-      userId: 3,
+      userId: 'c',
       priority: 3,
     });
     expect(service.getNextInQueue()).toEqual({
-      userId: 4,
+      userId: 'd',
       priority: 4,
     });
   });

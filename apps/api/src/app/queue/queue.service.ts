@@ -5,11 +5,7 @@ import { ChargingSession } from '../charging-session/charging-session';
 import { UsersService } from '../users/users.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ChargingStationStatus } from '../charging-station/charging-station-status.enum';
-
-export interface QueuedUser {
-  userId: string;
-  priority: number;
-}
+import { QueuedUser } from './queued-user';
 
 const MAX_SESSION_DURATION = 8;
 const MAX_QUEUE_SIZE = 10;
@@ -67,12 +63,12 @@ export class QueueService {
         newSession.endTime = new Date(
           now.getTime() + MAX_SESSION_DURATION * 60 * 60 * 1000
         );
-        newSession.reserved = false;
         station.status = ChargingStationStatus.IN_USE;
         await this.chargingStationService.createChargingStation(station);
         return this.sessionService.saveChargingSession(newSession);
       }
       // skip looping if there is no one in the queue.
+      this.logger.log('No queued users found.');
       return;
     }
   }

@@ -3,27 +3,12 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ChargingSessionDto } from './charging-session/charging-session.dto';
 import { ApiBasicAuth, ApiProperty, ApiQuery } from '@nestjs/swagger';
-import { AuthenticatedUser, User } from './auth/user.decorator';
+import { User } from './auth/user.decorator';
+import { AuthenticatedUser } from './auth/authenticated-user';
 
 export class AddChargingStationDto {
   @ApiProperty()
   location: string;
-}
-
-export class StartChargingSessionDto {
-  @ApiProperty()
-  chargingStationId: string;
-}
-
-export class ReserveSessionDto {
-  @ApiProperty()
-  userId: string;
-  @ApiProperty()
-  chargingStationId: string;
-  @ApiProperty()
-  startTime: Date;
-  @ApiProperty()
-  endTime: Date;
 }
 
 @ApiBasicAuth()
@@ -38,11 +23,7 @@ export class AppController {
   }
 
   @Post('/charging-stations')
-  addChargingStation(
-    @Body() id: AddChargingStationDto,
-    @User() user: AuthenticatedUser
-  ) {
-    console.log(user);
+  addChargingStation(@Body() id: AddChargingStationDto) {
     return this.appService.addChargingStation(id);
   }
 
@@ -51,7 +32,7 @@ export class AppController {
     return this.appService.getQueue();
   }
 
-  @Post('/charging-stations/enter-queue')
+  @Post('/queue/enter')
   enterQueue(@User() user: AuthenticatedUser) {
     return this.appService.enterQueue(user.id);
   }
@@ -68,21 +49,8 @@ export class AppController {
     return this.appService.saveChargingSession(chargingSession);
   }
 
-  @Post('/charging-sessions/start-session')
-  startChargingSession(
-    @Body() dto: StartChargingSessionDto,
-    @User() user: AuthenticatedUser
-  ) {
-    return this.appService.startChargingSession(user.id, dto);
-  }
-
   @Post('/charging-sessions/:id/end-session')
   endChargingSession(@Param('id') id: number, @User() user: AuthenticatedUser) {
     return this.appService.endChargingSession(id, user.id);
-  }
-
-  @Post('charging-sessions/reserve')
-  reserveChargingSession(@Body() dto: ReserveSessionDto) {
-    return this.appService.reserveSession(dto);
   }
 }

@@ -9,6 +9,4 @@ export class ChargingSessionDto {
   startTime: Date;
   @ApiProperty()
   endTime: Date;
-  @ApiProperty()
-  reserved: boolean;
 }

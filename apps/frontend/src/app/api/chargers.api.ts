@@ -16,12 +16,12 @@ export function getQueue(): Promise<number[]> {
 
 export function enterQueue(): Promise<void> {
   return apiClient
-    .post<void>('/api/charging-stations/enter-queue')
+    .post<void>('/api/queue/enter')
     .then((response) => response.data);
 }
 
 export function getChargingSession(
-  userId: string
+  userId?: string
 ): Promise<ChargingSessionDto[]> {
   return apiClient
     .get<ChargingSessionDto[]>(`/api/charging-sessions?userId=${userId}`)
