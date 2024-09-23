@@ -1,13 +1,16 @@
 import axios from 'axios';
 
-const username = 'uros';
-const password = 'uros';
-
 const apiClient = axios.create({
   baseURL: 'http://localhost:3000',
   headers: {
     'Content-Type': 'application/json',
-    Authorization: 'Basic ' + btoa(username + ':' + password),
+    Authorization:
+      'Basic ' +
+      btoa(
+        process.env['REACT_APP_USERNAME'] +
+          ':' +
+          process.env['REACT_APP_PASSWORD']
+      ),
   },
 });
 export default apiClient;
