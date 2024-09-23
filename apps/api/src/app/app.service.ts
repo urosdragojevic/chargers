@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
   AddChargingStationDto,
-  EndSessionDto,
   ReserveSessionDto,
   StartChargingSessionDto,
 } from './app.controller';
@@ -38,7 +37,7 @@ export class AppService {
     if (!user) {
       throw new Error('User not found.');
     }
-    this.queueService.addToQueue(userId);
+    return this.queueService.addToQueue(userId);
   }
 
   async saveChargingSession(chargingSessionDto: ChargingSessionDto) {
@@ -59,7 +58,7 @@ export class AppService {
     return this.chargingSessionService.getChargingSessions(chargingStationId);
   }
 
-  async startChargingSession(dto: StartChargingSessionDto) {
+  async startChargingSession(userId: string, dto: StartChargingSessionDto) {
     const chargingStation = await this.chargingStationsService.getById(
       dto.chargingStationId
     );
@@ -82,7 +81,7 @@ export class AppService {
       }
     }
     const newSession = new ChargingSession();
-    const user = await this.usersService.findOne(dto.userId);
+    const user = await this.usersService.findOne(userId);
     newSession.user = user;
     newSession.chargingStation = Promise.resolve(chargingStation);
     newSession.startTime = now;
@@ -100,12 +99,12 @@ export class AppService {
     return this.chargingSessionService.saveChargingSession(newSession);
   }
 
-  async endChargingSession(id: number, dto: EndSessionDto) {
+  async endChargingSession(id: number, userId: string) {
     const session = await this.chargingSessionService.getById(id);
     if (!session) {
       throw new Error('Charging session does not exist.');
     }
-    const user = await this.usersService.findOne(dto.userId);
+    const user = await this.usersService.findOne(userId);
     if (!user) {
       throw new Error('User not found.');
     }
@@ -148,5 +147,9 @@ export class AppService {
       // TODO: add to queue?
     }
     return this.chargingSessionService.saveChargingSession(newSession);
+  }
+
+  getQueue() {
+    return this.queueService.getQueue();
   }
 }

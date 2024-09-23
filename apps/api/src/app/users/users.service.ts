@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from './user';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class UsersService {
@@ -21,7 +22,7 @@ export class UsersService {
   async findOneByUsername(username: string): Promise<User> {
     const user = await this.usersRepository.findOneBy({ username });
     if (!user) {
-      throw new Error('User not found.');
+      throw new NotFoundError('User not found.');
     }
     return user;
   }

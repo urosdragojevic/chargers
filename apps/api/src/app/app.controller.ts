@@ -10,21 +10,9 @@ export class AddChargingStationDto {
   location: string;
 }
 
-export class EnterQueueDto {
-  @ApiProperty()
-  userId: string;
-}
-
 export class StartChargingSessionDto {
   @ApiProperty()
-  userId: string; //TODO: Remove after auth
-  @ApiProperty()
   chargingStationId: string;
-}
-
-export class EndSessionDto {
-  @ApiProperty()
-  userId: string; //TODO: Remove after auth
 }
 
 export class ReserveSessionDto {
@@ -58,12 +46,18 @@ export class AppController {
     return this.appService.addChargingStation(id);
   }
 
+  @Get('/queue')
+  getQueue() {
+    return this.appService.getQueue();
+  }
+
   @Post('/charging-stations/enter-queue')
-  enterQueue(@Body() dto: EnterQueueDto) {
-    return this.appService.enterQueue(dto.userId);
+  enterQueue(@User() user: AuthenticatedUser) {
+    return this.appService.enterQueue(user.id);
   }
 
   @ApiQuery({ name: 'chargingStationId', required: false, type: String })
+  @ApiQuery({ name: 'userId', required: false, type: String })
   @Get('/charging-sessions')
   getChargingSessions(@Query('chargingStationId') chargingStationId?: string) {
     return this.appService.getChargingSessions(chargingStationId);
@@ -75,13 +69,16 @@ export class AppController {
   }
 
   @Post('/charging-sessions/start-session')
-  startChargingSession(@Body() dto: StartChargingSessionDto) {
-    return this.appService.startChargingSession(dto);
+  startChargingSession(
+    @Body() dto: StartChargingSessionDto,
+    @User() user: AuthenticatedUser
+  ) {
+    return this.appService.startChargingSession(user.id, dto);
   }
 
   @Post('/charging-sessions/:id/end-session')
-  endChargingSession(@Param('id') id: number, @Body() dto: EndSessionDto) {
-    return this.appService.endChargingSession(id, dto);
+  endChargingSession(@Param('id') id: number, @User() user: AuthenticatedUser) {
+    return this.appService.endChargingSession(id, user.id);
   }
 
   @Post('charging-sessions/reserve')
